@@ -26,6 +26,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -36,28 +38,34 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.questfirebase.R
 import com.example.questfirebase.modeldata.Siswa
+import com.example.questfirebase.view.route.DestinasiHome
+import com.example.questfirebase.viewmodel.HomeViewModel
+import com.example.questfirebase.viewmodel.PenyediaViewModel
+import com.example.questfirebase.viewmodel.StatusUiSiswa
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HalamanHome(
-    navigateToEntry: () -> Unit,
-    navigateToUpdate: (Int) -> Unit,
+fun HomeScreen(
+    navigateToItemEntry: () -> Unit,
+    navigateToItemUpdate: (Int) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = viewModel(factory = PenyediaViewModel.Factory)
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val homeUiState by viewModel.statusUiSiswa.collectAsState()
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             SiswaTopAppBar(
-                title = stringResource(HomeDestination.titleRes),
+                title = stringResource(DestinasiHome.titleRes),
                 canNavigateBack = false,
                 scrollBehavior = scrollBehavior
             )
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = navigateToEntry,
+                //edit 1.2 : event onClick
+                onClick = navigateToItemEntry,
                 shape = MaterialTheme.shapes.medium,
                 modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_large))
             ) {
@@ -69,9 +77,9 @@ fun HalamanHome(
         },
     ) { innerPadding ->
         HomeBody(
-            siswaList = viewModel.homeUiState.collectAsState().value,
-            onSiswaClick = navigateToUpdate,
-            retryAction = viewModel::getSiswa,
+            statusUiSiswa = homeUiState,
+            onSiswaClick = navigateToItemUpdate,
+            retryAction = viewModel::loadSiswa,
             modifier = modifier
                 .padding(innerPadding)
                 .fillMaxSize()
@@ -81,20 +89,20 @@ fun HalamanHome(
 
 @Composable
 fun HomeBody(
-    statusUiState: StatusUiState,
+    statusUiSiswa: StatusUiSiswa,
     onSiswaClick: (Int) -> Unit,
     retryAction: () -> Unit,
     modifier: Modifier = Modifier
-) {
+){
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
-    ) {
-        when (statusUiState) {
-            is StatusUiState.Loading -> LoadingFotoView(modifier)
-            is StatusUiState.Success -> DaftarSiswaItemView(statusUiState.siswa,
-                onItemClick = { onSiswaClick(it.id_toilet!!) } )
-            is StatusUiState.Error -> ErrorView(
+    ){
+        when(statusUiSiswa){
+            is StatusUiSiswa.Loading -> LoadingScreen(modifier = modifier.fillMaxSize())
+            is StatusUiSiswa.Success -> DaftarSiswa(itemSiswa = statusUiSiswa.siswa ,
+                onSiswaClick = {onSiswaClick(it.id.toInt())} )
+            is StatusUiSiswa.Error -> ErrorScreen(
                 retryAction,
                 modifier = modifier.fillMaxSize()
             )
@@ -103,7 +111,7 @@ fun HomeBody(
 }
 
 @Composable
-fun LoadingFotoView(modifier: Modifier) {
+fun LoadingScreen(modifier: Modifier) {
     Image(
         modifier = modifier.size(200.dp),
         painter = painterResource(R.drawable.loading_img),
@@ -112,7 +120,7 @@ fun LoadingFotoView(modifier: Modifier) {
 }
 
 @Composable
-fun ErrorView(retryAction: () -> Unit, modifier: Modifier = Modifier) {
+fun ErrorScreen(retryAction: () -> Unit, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Center,
@@ -127,13 +135,14 @@ fun ErrorView(retryAction: () -> Unit, modifier: Modifier = Modifier) {
 
 @Composable
 fun DaftarSiswa(
-    listSiswa: List<Siswa>,
+    itemSiswa : List<Siswa>,
     onSiswaClick: (Siswa) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    LazyColumn(modifier = modifier) {
-        items(items = listSiswa, key = { it.id }) { person ->
-            SiswaCard(
+    modifier: Modifier=Modifier
+){
+    LazyColumn(modifier = Modifier){
+        items(items = itemSiswa, key = {it.id}){
+                person ->
+            ItemSiswa(
                 siswa = person,
                 modifier = Modifier
                     .padding(dimensionResource(id = R.dimen.padding_small))
@@ -142,9 +151,8 @@ fun DaftarSiswa(
         }
     }
 }
-
 @Composable
-fun SiswaCard(
+fun ItemSiswa(
     siswa: Siswa,
     modifier: Modifier = Modifier
 ) {
