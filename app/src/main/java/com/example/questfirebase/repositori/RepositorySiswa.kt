@@ -8,6 +8,9 @@ import kotlinx.coroutines.tasks.await
 interface RepositorySiswa {
     suspend fun getDataSiswa(): List<Siswa>
     suspend fun postDataSiswa(siswa: Siswa)
+    suspend fun getSatuSiswa(id: Long): Siswa?
+    suspend fun editSatuSiswa(id: Long, siswa: Siswa)
+    suspend fun hapusSatuSiswa(id: Long)
 }
 
 class FirebaseRepositorySiswa : RepositorySiswa {
@@ -73,6 +76,7 @@ class FirebaseRepositorySiswa : RepositorySiswa {
             )
         ).await()
     }
+
     override suspend fun hapusSatuSiswa(id: Long) {
         val docQuery = collection.whereEqualTo("id", id).get().await()
         val docId = docQuery.documents.firstOrNull()?.id ?: return
