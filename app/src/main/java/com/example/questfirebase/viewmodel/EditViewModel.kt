@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.questfirebase.modeldata.DetailSiswa
 import com.example.questfirebase.modeldata.UIStateSiswa
+import com.example.questfirebase.modeldata.toDataSiswa
 import com.example.questfirebase.repositori.RepositorySiswa
 import com.example.questfirebase.view.route.DestinasiDetail
 import kotlinx.coroutines.launch
@@ -37,3 +38,16 @@ RepositorySiswa
             nama.isNotBlank() && alamat.isNotBlank() && telpon.isNotBlank()
         }
     }
+
+    suspend fun editSatuSiswa(){
+        if (validasiInput(uiStateSiswa.detailSiswa)){
+            try {
+                repositorySiswa.editSatuSiswa(idSiswa,uiStateSiswa.detailSiswa.toDataSiswa
+                    ())
+                println("Update Sukses: $idSiswa")
+            } catch (e: Exception) {
+                println("Update Error: ${e.message}")
+            }
+        }
+    }
+}
