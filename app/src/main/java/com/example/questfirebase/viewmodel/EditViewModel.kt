@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.questfirebase.modeldata.DetailSiswa
 import com.example.questfirebase.modeldata.UIStateSiswa
 import com.example.questfirebase.repositori.RepositorySiswa
 import com.example.questfirebase.view.route.DestinasiDetail
@@ -25,4 +26,9 @@ RepositorySiswa
             uiStateSiswa = repositorySiswa.getSatuSiswa(idSiswa)!!
                 .toUiStateSiswa(true)
         }
+    }
+    fun updateUiState(detailSiswa: DetailSiswa) {
+        uiStateSiswa =
+            UIStateSiswa(detailSiswa = detailSiswa, isEntryValid = validasiInput
+                (detailSiswa))
     }
