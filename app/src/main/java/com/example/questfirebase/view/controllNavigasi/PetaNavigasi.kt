@@ -8,6 +8,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.questfirebase.view.DetailSiswaScreen
+import com.example.questfirebase.view.EditSiswaScreen
 import com.example.questfirebase.view.EntrySiswaScreen
 import com.example.questfirebase.view.HomeScreen
 import com.example.questfirebase.view.route.DestinasiDetail
